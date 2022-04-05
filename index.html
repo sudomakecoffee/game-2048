@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/src/style.css" rel="preload stylesheet" as="style" />
+    <title>2048 Clone</title>
+  </head>
+  <body>
+    <main id="app">
+      <div id="gameboard"></div>
+      <div class="scorebox">
+        <div id="current">Score: <span id="score">0</span></div>
+        <div id="high">High Score: <span id="highscore">0</span></div>
+      </div>
+    </main>
+    <dialog id="gameover-modal">
+      <div class="wrapper">
+        <div id="closeButton" role="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path
+              fill-rule="evenodd"
+              d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"
+            />
+            <path
+              fill-rule="evenodd"
+              d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"
+            />
+          </svg>
+        </div>
+        <div>Game Over!</div>
+        <div>Final score: <span id="modalScore">0</span></div>
+        <div id="playButton" role="button">Play Again</div>
+      </div>
+    </dialog>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,184 @@
+:root {
+  --border-radius: 1vmin;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Helvetica, sans-serif;
+  font-size: 7.5vmin;
+
+  background-color: #212131;
+  color: #212121;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  width: 100vw;
+  height: 100vh;
+
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+}
+
+#app {
+  background-color: inherit;
+}
+
+/********** GAME BOARD STYLES **********/
+#gameboard {
+  position: relative;
+
+  display: grid;
+  grid-template-rows: repeat(var(--gameboard-size), var(--gameboard-tile-size));
+  grid-template-columns: repeat(var(--gameboard-size), var(--gameboard-tile-size));
+  gap: var(--gameboard-gap);
+  padding: var(--gameboard-gap);
+
+  background-color: #999999;
+
+  border-radius: var(--border-radius);
+}
+
+.cell {
+  background-color: #cccccc;
+  border-radius: var(--border-radius);
+}
+
+.tile {
+  position: absolute;
+  top: calc(var(--y) * (var(--gameboard-tile-size) + var(--gameboard-gap)) + var(--gameboard-gap));
+  left: calc(var(--x) * (var(--gameboard-tile-size) + var(--gameboard-gap)) + var(--gameboard-gap));
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: var(--gameboard-tile-size);
+  height: var(--gameboard-tile-size);
+
+  border-radius: var(--border-radius);
+
+  font-weight: 700;
+  background: hsl(200, 50%, var(--bg-lightness));
+  color: hsl(200, 20%, var(--text-lightness));
+
+  animation: show 200ms ease-in-out;
+  transition: 100ms ease-in-out;
+
+  pointer-events: none;
+}
+
+/********** SCORE BOX STYLES **********/
+.scorebox {
+  color: #ffffff;
+  font-size: 2rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#high {
+  display: none;
+}
+
+#high.visible {
+  display: initial;
+}
+
+/********** GAME OVER MODAL STYLES **********/
+#gameover-modal {
+  max-width: 90vw;
+  width: 100%;
+  max-height: 90vh;
+  height: 100%;
+
+  border: none;
+  border-radius: var(--border-radius);
+
+  padding: 0;
+}
+
+#gameover-modal::backdrop {
+  background: hsla(0, 0%, 18%, 0.9);
+}
+
+#gameover-modal .wrapper {
+  background-color: #cccccc;
+  color: #181818;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 3rem;
+
+  height: 100%;
+  padding: 5rem 1.5rem;
+}
+
+#gameover-modal .wrapper [role="button"] {
+  cursor: pointer;
+}
+
+#gameover-modal #closeButton {
+  font-size: 1rem;
+
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+#gameover-modal #closeButton svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+#playButton::before {
+  content: "";
+  border: 2px solid #f3f3f3;
+  border-radius: var(--border-radius);
+
+  position: absolute;
+
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  inset: 4px;
+}
+
+#gameover-modal #playButton {
+  position: relative;
+
+  background-color: green;
+  color: #f3f3f3;
+
+  padding: 1rem 3rem;
+  margin-top: calc(auto - 3rem);
+  border-radius: var(--border-radius);
+}
+
+/********** SCREEN SIZE MEDIA QUERIES **********/
+@media only screen and (min-width: 35rem) {
+  #gameover-modal {
+    max-width: 65vmin;
+    max-height: 65vmin;
+  }
+}
+
+/********** ANIMATIONS **********/
+@keyframes show {
+  0% {
+    opacity: 0.5;
+    transform: scale(0);
+  }
+}
