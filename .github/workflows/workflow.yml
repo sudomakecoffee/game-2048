@@ -1,0 +1,117 @@
+name: Build and deploy web application
+on:
+  push:
+    branches:
+      - develop
+
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+  workflow_dispatch:
+
+jobs:
+  #  test:
+  #  TODO: create test job
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      short_hash: ${{ steps.get_short_hash.outputs.short_hash }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Get HEAD short hash
+        id: get_short_hash
+        run: |
+          echo "::set-output name=short_hash::$(git rev-parse --short HEAD)"
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Setup npm cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Install dependencies (strict)
+        run: npm ci
+
+      # Build based on selected environment
+      - name: Run stage build
+        if: github.ref_name == 'develop'
+        run: npm run build:stage --if-present
+
+      - name: Run build
+        if: github.ref_name == 'main'
+        run: npm run build --if-present
+
+      - name: Create build-output-latest artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: build-output-${{ steps.get_short_hash.outputs.short_hash }}
+          path: dist/
+
+  deploy-stage:
+    name: Deploy => Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    needs: build
+    if: github.ref_name == 'develop'
+
+    steps:
+      - name: Pull build output artifact
+        uses: actions/download-artifact@main
+        with:
+          name: build-output-${{ needs.build.outputs.short_hash }}
+          path: dist/
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: not_necessary
+
+      - name: Add known hosts
+        run: ssh-keyscan -p ${{ secrets.REMOTE_PORT }} -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy with rsync
+        run: |
+          rsync -avz --delete \
+          -e 'ssh -p ${{ secrets.REMOTE_PORT }}' \
+          $GITHUB_WORKSPACE/dist/ ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}
+
+  deploy-prod:
+    name: Deploy => Production
+    runs-on: ubuntu-latest
+    environment: production
+    needs: build
+    if: github.ref_name == 'main'
+
+    steps:
+      - name: Pull build output artifact
+        uses: actions/download-artifact@main
+        with:
+          name: build-output-${{ needs.build.outputs.short_hash }}
+          path: dist/
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: not_necessary
+
+      - name: Add known hosts
+        run: ssh-keyscan -p ${{ secrets.REMOTE_PORT }} -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy with rsync
+        run: |
+          rsync -avz --delete \
+          -e 'ssh -p ${{ secrets.REMOTE_PORT }}' \
+          $GITHUB_WORKSPACE/dist/ ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_TARGET }}
