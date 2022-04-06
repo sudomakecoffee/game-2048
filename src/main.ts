@@ -65,11 +65,14 @@ const findUIElements = () => {
     if (goModal.open) {
       goModal.close();
     }
-  })
+  });
 };
 
 const setup = () => {
   score = 0;
+  scoreBox.textContent = `${score}`;
+  goModalScore.textContent = `${score}`;
+
   grid = new Grid(gameBoard);
 
   grid.randomEmptyCell().tile = new Tile(gameBoard);
